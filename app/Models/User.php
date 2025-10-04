@@ -2,15 +2,17 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
+use Filament\Models\Contracts\FilamentUser;
 
-class User extends Authenticatable
+class User extends Authenticatable 
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -21,6 +23,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'no_telp',
+        'alamat',
     ];
 
     /**
@@ -42,4 +46,37 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    /**
+     * Get all donations made by this user
+     */
+    public function donations()
+    {
+        return $this->hasMany(Donation::class);
+    }
+
+    /**
+     * Get successful donations only
+     */
+    public function successDonations()
+    {
+        return $this->hasMany(Donation::class)->where('status', 'sukses');
+    }
+
+    /**
+     * Get total amount donated by this user
+     */
+    public function getTotalDonatedAttribute()
+    {
+        return $this->successDonations()->sum('jumlah');
+    }
+
+//      public function canAccessPanel(Panel $panel): bool
+// {
+    
+     
+//             return $this->hasRole('super_admin');
+      
+    
+// }
 }
